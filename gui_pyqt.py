@@ -7,6 +7,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QLineEdit, QTableWidget, QTableWidgetItem, QFileDialog, QTabWidget, QMessageBox
 from PyQt5.QtCore import Qt
 from logger import logger
+import numpy as np
 
 # Database connection
 def check_credentials(user_id, password):
@@ -124,7 +125,23 @@ class DisplayWindow(QMainWindow):
                 for j in range(len(df.columns)):
                     table.setItem(i, j, QTableWidgetItem(str(df.iat[i, j])))
             tab_layout.addWidget(table)
-
+            
+            # Insights Table
+            insights_table = QTableWidget()
+            insights_table.setColumnCount(5)
+            insights_table.setHorizontalHeaderLabels(["Variable", "Max", "Min", "Mean", "25th Quartile", "75th Quartile"])
+            for col in df.columns:
+                insights_table.insertRow(insights_table.rowCount())
+                insights_table.setItem(insights_table.rowCount() - 1, 0, QTableWidgetItem(col))
+                insights_table.setItem(insights_table.rowCount() - 1, 1, QTableWidgetItem(str(df[col].max())))
+                insights_table.setItem(insights_table.rowCount() - 1, 2, QTableWidgetItem(str(df[col].min())))
+                insights_table.setItem(insights_table.rowCount() - 1, 3, QTableWidgetItem(str(df[col].mean())))
+                insights_table.setItem(insights_table.rowCount() - 1, 4, QTableWidgetItem(str(np.percentile(df[col], 25))))
+                insights_table.setItem(insights_table.rowCount() - 1, 5, QTableWidgetItem(str(np.percentile(df[col], 75))))
+            tab_layout.addWidget(insights_table)
+            
+            
+            
             # Plotting
             self.fig, self.ax = plt.subplots(figsize=(8, 4))
             self.canvas = FigureCanvas(self.fig)
